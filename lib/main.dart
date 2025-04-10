@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +15,7 @@ import 'core/utils/loading_controller.dart'; // Correct import
 
 void main() async {
   await GetStorage.init();
+  FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
   runApp(const MyApp());
 }
 

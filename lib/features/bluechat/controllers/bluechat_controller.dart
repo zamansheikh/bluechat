@@ -78,12 +78,35 @@ class BluechatController extends GetxController {
     });
   }
 
+  Future<void> _requestForPermission() async {
+    if (Platform.isAndroid) {
+      debugPrint("Requesting Android permissions...");
+      await Permission.bluetoothScan.request();
+      await Permission.bluetoothConnect.request();
+      await Permission.locationWhenInUse.request();
+    } else if (Platform.isIOS) {
+      debugPrint("Requesting iOS permissions...");
+      await Permission.bluetooth.request();
+      await Permission.locationWhenInUse.request();
+    }
+    debugPrint("Permissions requested.");
+  }
+
   Future<bool> _checkPermissions() async {
     bool permissionsGranted = true;
     List<Permission> permissionsToRequest = [];
+    await _requestForPermission();
 
     if (Platform.isAndroid) {
       debugPrint("Checking Android permissions...");
+      debugPrint("Bluetooth Scan: ${await Permission.bluetoothScan.status}");
+      debugPrint(
+        "Bluetooth Connect: ${await Permission.bluetoothConnect.status}",
+      );
+      debugPrint(
+        "Location When In Use: ${await Permission.locationWhenInUse.status}",
+      );
+
       if (!await Permission.bluetoothScan.isGranted) {
         permissionsToRequest.add(Permission.bluetoothScan);
       }
@@ -94,22 +117,21 @@ class BluechatController extends GetxController {
         permissionsToRequest.add(Permission.locationWhenInUse);
       }
     } else if (Platform.isIOS) {
-      if (!await Permission.bluetooth.isGranted) {
-        permissionsToRequest.add(Permission.bluetooth);
-      }
-      if (!await Permission.locationWhenInUse.isGranted) {
-        permissionsToRequest.add(Permission.locationWhenInUse);
-      }
+      // Similar logging for iOS
     }
+    debugPrint("Permissions to request: $permissionsToRequest");
 
     if (permissionsToRequest.isNotEmpty) {
       Map<Permission, PermissionStatus> statuses =
           await permissionsToRequest.request();
+      debugPrint("Permission statuses: $statuses");
       permissionsGranted = statuses.values.every((status) => status.isGranted);
     }
 
     if (!permissionsGranted) {
       debugPrint("Required permissions were not granted.");
+    } else {
+      debugPrint("All required permissions are granted.");
     }
     return permissionsGranted;
   }
